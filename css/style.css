@@ -1,0 +1,544 @@
+:root {
+  --cream: #f3f0e8;
+  --cream-dark: #e8e3d6;
+  --ink: #1a1a1a;
+  --ink-soft: #4a4a46;
+  --line: rgba(26, 26, 26, 0.25);
+  --gold: #9a8657;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--cream);
+  color: var(--ink);
+  font-family: 'EB Garamond', serif;
+  overflow-x: hidden;
+}
+
+h1, h2 {
+  font-family: 'Playfair Display', serif;
+  margin: 0;
+  font-weight: 700;
+}
+
+p { margin: 0; }
+
+/* Cyrillic content: Playfair Display / EB Garamond have no Cyrillic glyphs,
+   so Ukrainian text gets a serif that actually covers it. */
+.lang-uk, .lang-uk h1, .lang-uk h2 {
+  font-family: 'PT Serif', serif;
+}
+.lang-uk .tl-event, .lang-uk .signoff {
+  font-family: 'PT Serif', serif;
+}
+
+.eyebrow {
+  font-size: 0.78rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-bottom: 0.6rem;
+}
+
+.rule {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin: 1.1rem 0;
+}
+.rule::before, .rule::after {
+  content: "";
+  width: 42px;
+  height: 1px;
+  background: var(--line);
+}
+.rule-icon { font-size: 0.9rem; opacity: 0.75; }
+
+/* ---------- Envelope landing ---------- */
+.envelope-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  background: radial-gradient(circle at 50% 40%, #fbfaf6 0%, var(--cream-dark) 100%);
+  transition: opacity 0.8s ease, visibility 0.8s ease;
+}
+.envelope-screen.is-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.envelope {
+  position: relative;
+  width: min(78vw, 300px);
+  aspect-ratio: 3 / 2;
+  cursor: pointer;
+  perspective: 900px;
+}
+
+.envelope-body {
+  position: absolute;
+  inset: 0;
+  background: var(--cream);
+  border: 1px solid var(--ink);
+  border-radius: 4px;
+  box-shadow: 0 18px 40px rgba(0,0,0,0.18);
+  overflow: hidden;
+}
+.envelope-shade {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 55%;
+  background: linear-gradient(120deg, rgba(0,0,0,0.05), transparent 60%);
+}
+.envelope-shade--left { left: 0; }
+.envelope-shade--right { right: 0; transform: scaleX(-1); }
+
+.card-peek {
+  position: absolute;
+  left: 6%;
+  right: 6%;
+  bottom: 8%;
+  top: 30%;
+  background: var(--ink);
+  border-radius: 3px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 10px;
+  transform: translateY(0%);
+  transition: transform 1s cubic-bezier(.4,0,.2,1) 0.35s;
+  z-index: 1;
+}
+.card-peek-leaf { font-size: 1.4rem; filter: grayscale(1) brightness(1.8); }
+
+.envelope-flap {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 62%;
+  background: var(--cream-dark);
+  border: 1px solid var(--ink);
+  border-bottom: none;
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  transform-origin: top center;
+  transition: transform 0.9s cubic-bezier(.4,0,.2,1);
+  z-index: 2;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.wax-seal {
+  position: absolute;
+  top: 52%;
+  left: 50%;
+  width: 46px;
+  height: 46px;
+  transform: translate(-50%, -50%);
+  background: var(--ink);
+  color: var(--cream);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Playfair Display', serif;
+  font-size: 0.85rem;
+  letter-spacing: 0.03em;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.35);
+  z-index: 3;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.envelope.is-open .envelope-flap {
+  transform: rotateX(-160deg);
+}
+.envelope.is-open .wax-seal {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.5);
+}
+.envelope.is-open .card-peek {
+  transform: translateY(-55%);
+}
+
+.tap-hint {
+  font-size: 0.85rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  animation: pulse 2.2s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+
+/* ---------- Invitation panels ---------- */
+.invitation {
+  position: relative;
+  z-index: 1;
+}
+
+.panel {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 4rem 1.5rem;
+  border-bottom: 1px solid var(--line);
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+.panel.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ---------- Passport-themed background decor ----------
+   Faint travel stamps / flight paths scattered behind the content of each
+   section (three per section, none on the cover). Each .decor is a masked
+   span so its colour comes from `background-color`: dark ink on the cream
+   panels, cream on the black panels — z-index:-1 keeps them under the text. */
+.decor {
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.08;
+  height: auto;
+  object-fit: contain;
+  filter: grayscale(1);
+  -webkit-user-select: none;
+  user-select: none;
+}
+/* Black-background sections: recolour the dark art to cream to match the palette */
+.panel--dresscode .decor,
+.panel--cover .decor {
+  opacity: 0.1;
+  filter: invert(1) sepia(0.22) saturate(0.6) brightness(1.05);
+}
+
+/* Sizes (width only — images keep their aspect ratio) */
+.decor--sm { width: clamp(70px, 16vw, 100px); }
+.decor--md { width: clamp(100px, 22vw, 140px); }
+.decor--lg { width: clamp(130px, 30vw, 190px); }
+.decor--wide { width: clamp(150px, 40vw, 230px); }
+
+/* Positions (deliberately scattered) */
+.decor--tl { top: 5%; left: 4%; }
+.decor--tr { top: 6%; right: 4%; }
+.decor--ml { top: 40%; left: 3%; }
+.decor--mr { top: 46%; right: 3%; }
+.decor--bl { bottom: 6%; left: 5%; }
+.decor--br { bottom: 6%; right: 5%; }
+.decor--tc { top: 4%; left: 52%; }
+.decor--bc { bottom: 5%; left: 42%; }
+
+/* A little rotation for a hand-placed, random feel */
+.decor--rot-a { transform: rotate(-13deg); }
+.decor--rot-b { transform: rotate(15deg); }
+.decor--rot-c { transform: rotate(-7deg); }
+
+.panel--cover { background: var(--ink); color: var(--cream); }
+.panel--cover .eyebrow { color: rgba(243,240,232,0.65); }
+
+.names {
+  font-size: clamp(2.2rem, 8vw, 3.6rem);
+  line-height: 1.15;
+}
+.amp { font-style: italic; opacity: 0.8; padding: 0 0.15em; }
+
+.cover-date { font-size: 1.05rem; letter-spacing: 0.08em; }
+.cover-place { font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.2em; margin-top: 0.35rem; color: var(--ink-soft); }
+.panel--cover .cover-place { color: rgba(243,240,232,0.7); }
+
+/* Couple illustration on the cover — fades into the ink background */
+.cover-couple {
+  width: clamp(180px, 46vw, 260px);
+  height: auto;
+  margin-top: 1.75rem;
+  opacity: 0.75;
+  -webkit-mask-image: linear-gradient(to bottom, #000 76%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 76%, transparent 100%);
+  pointer-events: none;
+  user-select: none;
+}
+
+.stamp {
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  width: 108px;
+  height: 108px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+}
+.stamp strong { font-family: 'Playfair Display', serif; font-size: 1rem; color: var(--ink); margin-top: 0.2rem; }
+
+.headline { font-size: clamp(2rem, 7vw, 3rem); }
+.headline .block { display: block; font-size: 0.55em; letter-spacing: 0.1em; margin-top: 0.2rem; }
+.headline--sm { font-size: clamp(1.6rem, 5vw, 2.2rem); }
+
+.lede {
+  max-width: min(480px, 100%);
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: var(--ink-soft);
+  font-style: italic;
+}
+
+/* ---------- Featured photo frame ---------- */
+.photo-frame {
+  width: 168px;
+  height: 224px;
+  margin: 0.5rem 0 0.75rem;
+  padding: 10px;
+  border: 1px solid var(--ink);
+  background: var(--cream);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+}
+.photo-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(1) contrast(1.05);
+}
+.photo-frame--lg {
+  width: min(340px, 78vw);
+  height: auto;
+  aspect-ratio: 3 / 4;
+  margin: 0;
+}
+
+/* ---------- Two-column split (text left, photo right) ---------- */
+.split {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2.5rem;
+  width: 100%;
+  max-width: 1040px;
+}
+.split-text { max-width: min(520px, 100%); min-width: 0; }
+.split-media { display: flex; justify-content: center; }
+
+@media (min-width: 820px) {
+  .split {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 4rem;
+  }
+  .split-text, .split-media { flex: 1 1 0; }
+  .split-media { justify-content: flex-start; }
+}
+
+.thanks-title { text-transform: uppercase; letter-spacing: 0.18em; }
+.panel--thanks .lede { margin: 0 auto; }
+.panel--thanks .rule { margin: 1.5rem auto; }
+
+.photo-caption {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 1rem;
+  color: var(--ink-soft);
+  margin-bottom: 1.25rem;
+}
+
+/* ---------- Gallery (modern masonry grid) ---------- */
+.gallery-grid {
+  columns: 2;
+  column-gap: 0.75rem;
+  width: 100%;
+  max-width: 960px;
+  margin-top: 1rem;
+}
+.gallery-grid img {
+  width: 100%;
+  margin-bottom: 0.75rem;
+  display: block;
+  break-inside: avoid;
+  border-radius: 8px;
+  background: var(--cream-dark);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+}
+.gallery-grid img:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.18);
+}
+@media (min-width: 720px) {
+  .gallery-grid {
+    columns: 3;
+    column-gap: 1rem;
+  }
+  .gallery-grid img { margin-bottom: 1rem; }
+}
+@media (min-width: 1040px) {
+  .gallery-grid { columns: 4; }
+}
+
+/* ---------- Itinerary timeline ---------- */
+.timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  max-width: 420px;
+  text-align: left;
+}
+.timeline li {
+  display: grid;
+  grid-template-columns: 52px 58px 1fr;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.8rem 0;
+  border-bottom: 1px dashed var(--line);
+  font-size: 0.92rem;
+}
+.tl-time { color: var(--ink-soft); font-size: 0.82rem; letter-spacing: 0.03em; }
+.tl-icon {
+  width: 46px;
+  height: 46px;
+  object-fit: contain;
+  justify-self: center;
+}
+.tl-event { font-family: 'Playfair Display', serif; font-size: 1rem; line-height: 1.35; }
+.tl-event small { display: block; font-size: 0.72rem; color: var(--ink-soft); font-style: italic; margin-top: 0.15rem; }
+
+/* ---------- Dress code ---------- */
+.panel--dresscode { background: var(--ink); color: var(--cream); }
+.panel--dresscode .eyebrow { color: rgba(243,240,232,0.65); }
+.panel--dresscode .lede { color: rgba(243,240,232,0.75); }
+.panel--dresscode .rule::before,
+.panel--dresscode .rule::after { background: rgba(243, 240, 232, 0.3); }
+
+.rule-icon--bowtie {
+  display: inline-flex;
+  align-items: center;
+}
+.rule-icon--bowtie svg {
+  width: 26px;
+  height: 16px;
+  display: block;
+}
+
+/* Black-tie couple line-art on the ink panel. The source art is a bright neon
+   gold; mute it to the invitation's soft champagne-gold so it reads as elegant
+   line work rather than a glowing sign. */
+.dresscode-illustration {
+  width: clamp(220px, 62vw, 340px);
+  height: auto;
+  margin-top: 2.25rem;
+  filter: saturate(0.5) brightness(0.82) contrast(1.05);
+  opacity: 0.92;
+  -webkit-mask-image: linear-gradient(to bottom, #000 70%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 70%, transparent 100%);
+  pointer-events: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* ---------- Venue ---------- */
+.venue-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  width: 100%;
+  max-width: 420px;
+}
+.venue-card {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 1.2rem 1.4rem;
+  background: rgba(255,255,255,0.4);
+}
+.venue-illustration {
+  width: 100%;
+  max-width: 220px;
+  margin: 0 auto 0.8rem;
+  display: block;
+  mix-blend-mode: multiply;
+}
+.venue-card h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.15rem;
+  margin-bottom: 0.4rem;
+}
+.venue-card p { color: var(--ink-soft); font-size: 0.92rem; margin-bottom: 0.2rem; }
+.directions {
+  display: inline-block;
+  margin-top: 0.7rem;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  color: var(--ink);
+  text-decoration: none;
+  border-bottom: 1px solid var(--ink);
+  padding-bottom: 2px;
+}
+
+/* ---------- Closing ---------- */
+.panel--closing .lede,
+.panel--closing .signoff { margin-left: auto; margin-right: auto; }
+
+/* Polaroid. On mobile it flows in below the signoff; on wider screens it
+   floats to the right edge, vertically centred, like the reference. */
+.polaroid {
+  display: block;
+  margin: 1.9rem auto 0;
+  width: clamp(180px, 62vw, 240px);
+  height: auto;
+  transform: rotate(4deg);
+  filter: drop-shadow(0 16px 30px rgba(0, 0, 0, 0.22));
+  -webkit-user-select: none;
+  user-select: none;
+}
+@media (min-width: 820px) {
+  .polaroid {
+    position: absolute;
+    top: 50%;
+    right: 6%;
+    margin: 0;
+    width: 250px;
+    transform: translateY(-50%) rotate(6deg);
+    pointer-events: none;
+  }
+}
+
+.signoff {
+  margin-top: 1.5rem;
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 1.2rem;
+}
+.footer-strip {
+  margin-top: 2.5rem;
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  color: var(--ink-soft);
+  word-spacing: 0.4em;
+}
+
+@media (min-width: 720px) {
+  .venue-cards { flex-direction: row; }
+  .venue-card { flex: 1; }
+}
